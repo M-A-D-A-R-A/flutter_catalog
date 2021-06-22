@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_catalog/core/store.dart';
+import 'package:flutter_catalog/models/cart.dart';
 import 'package:flutter_catalog/models/catalog.dart';
-
 
 import 'package:velocity_x/velocity_x.dart';
 
@@ -10,11 +12,13 @@ class HomeDetailPage extends StatelessWidget {
   const HomeDetailPage({Key key, @required this.catalog})
       : assert(catalog != null),
         super(key: key);
+
   @override
   Widget build(BuildContext context) {
+    final CartModel _cart = (VxState.store as MyStore).cart;
+    bool isIncart = _cart.items.contains(catalog) ?? false;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent),
+      appBar: AppBar(backgroundColor: Colors.transparent),
       backgroundColor: context.canvasColor,
       bottomNavigationBar: Container(
         color: context.cardColor,
@@ -24,7 +28,12 @@ class HomeDetailPage extends StatelessWidget {
           children: [
             "\$${catalog.price}".text.bold.xl4.red800.make(),
             ElevatedButton(
-              onPressed: () =>Navigator(),
+              onPressed: () {
+                if (!isIncart) {
+                  AddMutation(catalog);
+                  isIncart = true;
+                }
+              },
               style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all(
                     context.theme.buttonColor,
@@ -32,7 +41,9 @@ class HomeDetailPage extends StatelessWidget {
                   shape: MaterialStateProperty.all(
                     StadiumBorder(),
                   )),
-              child: "Add to cart".text.make(),
+              child: isIncart
+                  ? Icon(Icons.done)
+                  : Icon(CupertinoIcons.cart_badge_plus),
             ).wh(120, 50)
           ],
         ).p32(),
